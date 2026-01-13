@@ -1,26 +1,23 @@
 package com.ratel.auth.user.model;
 
-import com.ratel.auth.common.BaseEntity;
+import com.ratel.auth.common.BaseEntitty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Role extends BaseEntity {
-    @Id @GeneratedValue
-    private Long id;
+public class Role extends BaseEntitty {
+    @Column(unique = true)
     private String name;
     @ManyToMany(mappedBy = "roles")
-    private List<User> users;
+    private List<UserCredential> users;
 }

@@ -7,48 +7,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
-public class User implements UserDetails {
-    /*@Id @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;*/
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
+public class UserCredential implements UserDetails {
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+    @Column(nullable = false, length = 30)
     private String firstname;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String lastname;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
+    @Column(length = 20)
     private String phone;
+    @Column(length = 100)
     private String password;
-    private LocalDateTime dateOfBirth;
-
-    private boolean isAccountEnabled;
-    private boolean isAccountLocked;
-    private boolean isCredentialExpired;
-    private boolean isEmailVerified;
-    private boolean isPhoneVerified;
-
-    @ManyToMany(
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            fetch = FetchType.EAGER
-    )
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "UserRole",
             joinColumns = @JoinColumn(name = "userId"),
@@ -56,23 +44,31 @@ public class User implements UserDetails {
     )
     private List<Role> roles;
 
+    private boolean isEnabled;
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
 
-    public User(String firstname, String lastname, String email, String phone, String password, String roles) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.email = email;
-        this.phone = phone;
-        this.password = password;
-    }
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    @Column(insertable = false)
+    private LocalDateTime updatedAt;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (CollectionUtils.isEmpty(this.roles)) {
+        if (this.roles.isEmpty()) {
             return List.of();
         }
-        return this.roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+        return this.roles.stream().map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();
+    }
+
+    @Override
+    public @Nullable String getPassword() {
+        return this.password;
     }
 
     @Override
@@ -82,16 +78,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return this.isAccountEnabled;
+        return this.isAccountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return this.isAccountLocked;
+        return this.isAccountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return this.isCredentialExpired;
+        return this.isCredentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.isEnabled;
     }
 }
