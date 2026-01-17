@@ -74,7 +74,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse refreshToken(RefreshRequest request) {
-        return null;
+        String accessToken = jwtService.refreshAccessToken(request.refreshToken());
+        String tokenType = "Bearer";
+        return new AuthenticationResponse(request.refreshToken(), accessToken, tokenType);
     }
 
     private void checkEmailExists(String email) {

@@ -46,7 +46,7 @@ public class JwtService {
                 .issuedAt(now)
                 .expiresAt(now.plus(refreshTokenExpiration, ChronoUnit.HOURS))
                 .subject(username)
-                .claim(TOKEN_TYPE, "ACCESS_TOKEN")
+                .claim(TOKEN_TYPE, "REFRESH_TOKEN")
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: auth
+    name: auth-service
   config:
     import: optional:file:.env[.properties]
   datasource:
@@ -24,12 +24,14 @@ jwt:
   access-token-expiration: 24 #hours
   refresh-token-expiration: 168
 
-
-logging:
-  level:
-    org:
-      springframework:
-        security: debug
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${EUREKA_INSTANCE_HOSTNAME}:${EUREKA_SERVER_PORT}/eureka/
 
 server:
-  port: 8686
+  port: 2331
